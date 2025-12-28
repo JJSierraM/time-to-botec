@@ -1,6 +1,7 @@
 package samples
 
 import "core:math"
+import "core:fmt"
 
 PI :: 3.14159265358979323846
 N :: 1000000
@@ -137,5 +138,17 @@ sample_many :: proc (seed : ^u32) -> f32 {
 }
 
 main :: proc() {
+    //Declare variables
+    p_a, p_b, p_c : f32
 
+    // Initialize variables
+    p_a, p_b = 0.8, 0.5
+    p_c = p_a * p_b
+
+    // Generate mixture
+    weights := [?]f32{1 - p_c, p_c / 2, p_c / 4, p_c / 4}
+    samplers := [?]proc(^u32)->f32{sample_0, sample_1, sample_few, sample_many}
+
+    results := make([dynamic]f32, N)
+    fmt.println("Sum(dist_mixture, N)/N = %f", array_sum(results[:]) / N)
 }
