@@ -150,5 +150,7 @@ main :: proc() {
     samplers := [?]proc(^u32)->f32{sample_0, sample_1, sample_few, sample_many}
 
     results := make([dynamic]f32, N)
+    defer delete(results)
+    mixture(samplers[:], weights[:], results[:])
     fmt.println("Sum(dist_mixture, N)/N = ", array_sum(results[:]) / N)
 }
