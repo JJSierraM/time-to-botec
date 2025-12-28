@@ -18,8 +18,7 @@ array_sum :: proc (array : []f32) -> f32 {
 }
 
 array_cumsum :: proc (array : []f32) -> []f32 {
-    output : [dynamic]f32
-    resize(&output, len(array))
+    output := make([dynamic]f32, len(array))
     output[0] = array[0]
     for i in 1..<len(array) {
         output[i] = array[i] + output[i-1]
@@ -92,6 +91,31 @@ random_to :: proc (low, high : f32, seed : ^u32) -> f32 {
 }
 
 //TODO : mixture function
+// Mixture function
+mixture :: proc (samplers : []proc(^u32)->f32, weights, results : []f32) {
+    n_dists : int = len(samplers)
+
+    sum_weights : f32 = array_sum(weights)
+    normalized_weights := make([dynamic]f32, n_dists)
+    defer delete(normalized_weights)
+    for i in 0..<n_dists {
+        normalized_weights[i] = weights[i] / sum_weights
+    }
+
+    cummulative_weights := array_cumsum(normalized_weights[:])
+    defer delete(cummulative_weights)
+
+    seed : u32 = 1234 //Whatever you want EXCEPT 0
+    for i in 0..<len(results) {
+        p1 := random_uniform(0, 1, &seed)
+        for weight, j in cummulative_weights {
+            if p1 < weight {
+                results[i] = samplers[j](&seed)
+                break
+            }
+        }
+    }
+}
 
 // Functions used for the BOTEC
 // Their type has to be the same, as we will be passing them around
