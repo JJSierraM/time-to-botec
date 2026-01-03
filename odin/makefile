@@ -1,7 +1,10 @@
 MAKEFLAGS += --no-print-directory
 
 install-odin:
-	
+	sudo mkdir -p /bin/odinlang
+	sudo wget -P /bin/odinlang https://github.com/odin-lang/Odin/releases/download/dev-2025-12a/odin-linux-arm64-dev-2025-12a.tar.gz
+	sudo tar -xf /bin/odinlang/odin-linux-arm64-dev-2025-12a.tar.gz -C /bin/odinlang/
+	sudo rm /bin/odinlang/odin-linux-arm64-dev-2025-12a.tar.gz
 
 build-c-like: 
 	@odin build ./c-like/samples.odin -file -out:./c-like/samples -o:speed
@@ -27,17 +30,14 @@ run-all:
 
 profile-c-like:
 	@make build-c-like
-# 	time ./c-like/samples
 	@t=$$(/usr/bin/time -f "%e" -p bash -c 'for i in {1..100}; do ./c-like/samples; done' 2>&1 >/dev/null | grep real | awk '{print $$2}' ); echo "scale=2; 1000 * $$t / 100" | bc | sed "s|^|Time for c-like (Single Thread): |" | sed 's|$$|ms|' && echo
 
 profile-st:
 	@make build-st
-# 	time ./odin-like/samples-st
 	@t=$$(/usr/bin/time -f "%e" -p bash -c 'for i in {1..100}; do ./odin-like/samples-st; done' 2>&1 >/dev/null | grep real | awk '{print $$2}' ); echo "scale=2; 1000 * $$t / 100" | bc | sed "s|^|Time for idiomatic (Single Thread): |" | sed 's|$$|ms|' && echo
 profile-mt:
 	@make build-mt
 	@t=$$(/usr/bin/time -f "%e" -p bash -c 'for i in {1..100}; do ./odin-like/samples-mt; done' 2>&1 >/dev/null | grep real | awk '{print $$2}' ); echo "scale=2; 1000 * $$t / 100" | bc | sed "s|^|Time for idiomatic (16 Threads): |" | sed 's|$$|ms|' && echo
-# 	time ./odin-like/samples-mt
 profile-all:
 	@make profile-c-like
 	@make profile-st
